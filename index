@@ -1,0 +1,1066 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<meta name="theme-color" content="#0B1F3A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Meal Journal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
+<style>
+:root{
+  --navy:#0B1F3A;--navy2:#13294B;--navy3:#1F3B68;--navy-soft:#EEF2F8;
+  --orange:#FF7A1A;--orange2:#FFA05C;--orange3:#F05A0A;--orange-soft:#FFF2E8;
+  --bg:#F4F6FA;--card:#FFFFFF;--ink:#0B1F3A;--ink2:#3B4A63;--muted:#8792A6;--line:#E8ECF2;
+  --ok:#17A673;--bad:#E5484D;
+  --r:22px;--shadow:0 14px 34px -16px rgba(11,31,58,.22),0 2px 6px rgba(11,31,58,.04);
+  --ease:cubic-bezier(.2,.9,.25,1);
+  --sb:env(safe-area-inset-bottom,0px);--st:env(safe-area-inset-top,0px);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:'Kanit',system-ui,-apple-system,sans-serif;font-weight:300;-webkit-font-smoothing:antialiased}
+body{min-height:100vh;overflow-x:hidden}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+b,strong{font-weight:500}
+.ic{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.app{max-width:520px;margin:0 auto;position:relative;min-height:100vh;padding-bottom:calc(120px + var(--sb))}
+
+/* ---------- Splash ---------- */
+#splash{position:fixed;inset:0;z-index:100;background:radial-gradient(120% 80% at 80% 0%,#1F3B68 0%,#0B1F3A 60%);display:grid;place-items:center;transition:opacity .6s var(--ease),visibility .6s}
+#splash.hide{opacity:0;visibility:hidden}
+.splash-in{text-align:center;color:#fff}
+.logo{width:76px;height:76px;border-radius:24px;background:linear-gradient(135deg,var(--orange2),var(--orange) 55%,var(--orange3));display:grid;place-items:center;margin:0 auto 18px;box-shadow:0 18px 40px -10px rgba(255,122,26,.65);animation:pulse 1.6s ease-in-out infinite}
+.logo .ic{width:36px;height:36px;stroke-width:1.6;color:#fff}
+.splash-in h1{margin:0;font-weight:500;letter-spacing:.28em;font-size:15px}
+.splash-in p{margin:6px 0 0;font-size:12px;opacity:.55;letter-spacing:.1em}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+
+/* ---------- Hero ---------- */
+.hero{position:relative;overflow:hidden;color:#fff;padding:calc(16px + var(--st)) 20px 84px;border-radius:0 0 34px 34px;
+  background:linear-gradient(160deg,#0B1F3A 0%,#13294B 55%,#1F3B68 100%)}
+.hero::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(115deg,rgba(255,255,255,.035) 0 1px,transparent 1px 22px);pointer-events:none}
+.blob{position:absolute;border-radius:50%;filter:blur(42px);opacity:.5;animation:float 14s ease-in-out infinite;pointer-events:none}
+.b1{width:230px;height:230px;background:var(--orange);top:-90px;right:-70px}
+.b2{width:200px;height:200px;background:#3D6BB3;bottom:-110px;left:-60px;animation-delay:-5s}
+@keyframes float{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(-24px,18px) scale(1.08)}66%{transform:translate(16px,-12px) scale(.95)}}
+.hero-top{position:relative;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.brand{display:flex;align-items:center;gap:10px;font-size:12px;letter-spacing:.24em;font-weight:500}
+.brand .mark{width:34px;height:34px;border-radius:11px;background:linear-gradient(135deg,var(--orange2),var(--orange3));display:grid;place-items:center;box-shadow:0 6px 16px -4px rgba(255,122,26,.6)}
+.brand .mark .ic{width:18px;height:18px;color:#fff}
+.demo-badge{font-size:9px;letter-spacing:.1em;padding:2px 7px;border-radius:99px;background:rgba(255,255,255,.14);margin-left:2px}
+.mode{display:flex;align-items:center;gap:7px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);backdrop-filter:blur(10px);color:#fff;border-radius:99px;padding:7px 13px 7px 10px;font-size:12px;transition:.3s var(--ease)}
+.mode .ic{width:16px;height:16px}
+.mode.on{background:linear-gradient(135deg,var(--orange2),var(--orange));border-color:transparent;box-shadow:0 8px 20px -6px rgba(255,122,26,.7)}
+.hero-text{position:relative;margin-top:26px}
+.hero-text small{display:block;font-size:13px;opacity:.6;letter-spacing:.02em}
+.hero-text h1{margin:4px 0 0;font-size:27px;font-weight:500;line-height:1.25}
+.hero-text h1 span{color:var(--orange2)}
+.hero-text.swap{animation:fadeUp .55s var(--ease)}
+
+/* ---------- Layout ---------- */
+.content{margin-top:-60px;padding:0 16px;position:relative;z-index:2}
+.page{display:none}
+.page.active{display:block}
+.card{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);padding:18px;margin-bottom:14px}
+.reveal{opacity:0;animation:fadeUp .7s var(--ease) forwards;animation-delay:calc(var(--d,0) * 70ms)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+.sec-h{display:flex;align-items:baseline;justify-content:space-between;margin:22px 4px 10px}
+.sec-h h3{margin:0;font-size:16px;font-weight:500}
+.sec-h a,.link{font-size:12.5px;color:var(--orange);font-weight:400;background:none;border:0;padding:0}
+.muted{color:var(--muted)}
+
+/* ---------- Ring card ---------- */
+.ring-card{display:flex;gap:16px;align-items:center;padding:20px 18px}
+.ring-wrap{position:relative;width:138px;height:138px;flex:none}
+.ring{width:100%;height:100%;transform:rotate(-90deg)}
+.ring circle{fill:none;stroke-width:11}
+.ring-bg{stroke:var(--navy-soft)}
+.ring-fg{stroke:url(#rg);stroke-linecap:round;stroke-dasharray:326.73;stroke-dashoffset:326.73;transition:stroke-dashoffset 1.4s var(--ease)}
+.ring-fg.over{stroke:var(--bad)}
+.ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.ring-center small{font-size:11px;color:var(--muted);line-height:1.2}
+.ring-center b{font-size:28px;font-weight:600;line-height:1.15;color:var(--navy)}
+.ring-side{flex:1;min-width:0}
+.remain{display:flex;align-items:baseline;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+.remain small{font-size:12px;color:var(--muted);width:100%}
+.remain b{font-size:24px;font-weight:600;color:var(--orange)}
+.remain.over b{color:var(--bad)}
+.remain span{font-size:12px;color:var(--muted)}
+.mbar{margin-top:9px}
+.mbar-top{display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px}
+.mbar-top span:last-child{color:var(--muted)}
+.mbar-track{height:7px;border-radius:9px;background:var(--navy-soft);overflow:hidden}
+.mbar-fill{height:100%;width:0;border-radius:9px;transition:width 1.2s var(--ease)}
+.mbar-fill.p{background:linear-gradient(90deg,var(--navy3),var(--navy))}
+.mbar-fill.c{background:linear-gradient(90deg,var(--orange2),var(--orange))}
+.mbar-fill.f{background:linear-gradient(90deg,#C3CDDC,#8A9BB8)}
+
+/* ---------- Stats ---------- */
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.stat{background:var(--card);border-radius:20px;box-shadow:var(--shadow);padding:15px 15px 14px;position:relative;overflow:hidden}
+.stat::after{content:"";position:absolute;right:-26px;top:-26px;width:74px;height:74px;border-radius:50%;background:var(--orange-soft);opacity:.7}
+.stat.dark{background:linear-gradient(150deg,var(--navy2),var(--navy));color:#fff}
+.stat.dark::after{background:rgba(255,122,26,.22)}
+.stat .lbl{font-size:12px;color:var(--muted);position:relative;z-index:1}
+.stat.dark .lbl{color:rgba(255,255,255,.6)}
+.stat .val{font-size:25px;font-weight:600;margin-top:2px;position:relative;z-index:1;line-height:1.25}
+.stat .val small{font-size:12px;font-weight:300;color:var(--muted);margin-left:3px}
+.stat.dark .val small{color:rgba(255,255,255,.55)}
+.pill{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:2px 9px;border-radius:99px;margin-top:6px;background:var(--navy-soft);color:var(--ink2);position:relative;z-index:1}
+.pill.good{background:#E6F6EF;color:var(--ok)}
+.pill.warn{background:var(--orange-soft);color:var(--orange3)}
+.pill.bad{background:#FDECEC;color:var(--bad)}
+.stat.dark .pill{background:rgba(255,255,255,.12);color:#fff}
+
+/* ---------- Banner ---------- */
+.banner{display:flex;gap:12px;align-items:center;background:linear-gradient(135deg,var(--orange-soft),#fff);border:1px solid #FFE0C7}
+.banner .ic{color:var(--orange);width:26px;height:26px}
+.banner p{margin:0;font-size:13px;flex:1;line-height:1.45}
+
+/* ---------- Meals ---------- */
+.hscroll{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -16px;padding:2px 16px 8px;scrollbar-width:none}
+.hscroll::-webkit-scrollbar{display:none}
+.mini{flex:0 0 152px;scroll-snap-align:start;background:var(--card);border-radius:20px;box-shadow:var(--shadow);overflow:hidden;border:0;padding:0;text-align:left}
+.mini .phbox{height:108px}
+.mini .mi-b{padding:10px 12px 12px}
+.mini h4{margin:4px 0 2px;font-size:13.5px;font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mini .k{font-size:12px;color:var(--muted)}
+.mini .k b{color:var(--orange);font-weight:600;font-size:14px}
+
+.phbox{position:relative;overflow:hidden;background:linear-gradient(135deg,var(--c1,#FFD7B8),var(--c2,#FF9A4D));display:grid;place-items:center}
+.phbox>.ic{width:30px;height:30px;color:rgba(255,255,255,.85);stroke-width:1.5}
+.phbox img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transform:scale(1.06);transition:opacity .6s,transform 1s var(--ease)}
+.phbox img.ok{opacity:1;transform:none}
+.phbox img.err{display:none}
+
+.tag{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:400;color:var(--ink2)}
+.tag::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--tc,var(--orange))}
+
+.datestrip{display:flex;gap:8px;overflow-x:auto;margin:0 -16px;padding:4px 16px 10px;scrollbar-width:none;scroll-snap-type:x proximity}
+.datestrip::-webkit-scrollbar{display:none}
+.dchip{flex:0 0 54px;height:72px;border-radius:18px;border:0;background:var(--card);box-shadow:var(--shadow);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;position:relative;transition:.35s var(--ease);scroll-snap-align:center}
+.dchip small{font-size:11px;color:var(--muted)}
+.dchip b{font-size:19px;font-weight:500}
+.dchip i{position:absolute;bottom:8px;width:5px;height:5px;border-radius:50%;background:var(--orange)}
+.dchip.all{flex-basis:62px}
+.dchip.all b{font-size:13px}
+.dchip.on{background:linear-gradient(160deg,var(--navy3),var(--navy));color:#fff;transform:translateY(-3px);box-shadow:0 14px 26px -10px rgba(11,31,58,.6)}
+.dchip.on small{color:rgba(255,255,255,.6)}
+.dchip.on i{background:var(--orange2)}
+
+.daysum{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;text-align:center;padding:14px 10px}
+.daysum div{border-right:1px solid var(--line)}
+.daysum div:last-child{border:0}
+.daysum b{display:block;font-size:18px;font-weight:600}
+.daysum b.o{color:var(--orange)}
+.daysum small{font-size:11px;color:var(--muted)}
+
+.dgroup-h{font-size:13px;color:var(--muted);margin:18px 4px 10px;display:flex;justify-content:space-between}
+.timeline{position:relative;padding-left:20px}
+.timeline::before{content:"";position:absolute;left:6px;top:10px;bottom:10px;width:2px;background:linear-gradient(var(--line),var(--line) 60%,transparent)}
+.mcard{position:relative;display:flex;gap:12px;align-items:stretch;background:var(--card);border-radius:20px;box-shadow:var(--shadow);padding:10px;margin-bottom:12px;width:100%;border:0;text-align:left;transition:transform .25s var(--ease)}
+.mcard:active{transform:scale(.98)}
+.mcard::before{content:"";position:absolute;left:-19px;top:22px;width:10px;height:10px;border-radius:50%;background:#fff;border:3px solid var(--tc,var(--orange))}
+.mcard .phbox{width:84px;height:84px;border-radius:15px;flex:none}
+.mcard .mc-b{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;padding-right:4px}
+.mc-top{display:flex;justify-content:space-between;align-items:center}
+.mc-top time{font-size:12px;color:var(--muted)}
+.mcard h4{margin:4px 0 5px;font-size:15px;font-weight:400;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.macros{display:flex;gap:10px;font-size:12px;color:var(--muted);flex-wrap:wrap}
+.macros b{color:var(--orange);font-weight:600}
+.macros span em{font-style:normal;color:var(--ink2)}
+
+.empty{text-align:center;padding:30px 20px;color:var(--muted)}
+.empty .eic{width:64px;height:64px;border-radius:22px;background:var(--orange-soft);display:grid;place-items:center;margin:0 auto 12px}
+.empty .eic .ic{color:var(--orange);width:30px;height:30px}
+.empty p{margin:0 0 14px;font-size:14px}
+
+/* ---------- Body ---------- */
+.mtiles{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.mtiles .stat:first-child{grid-column:1 / -1;display:flex;align-items:center;justify-content:space-between}
+.chips{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin-bottom:12px}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;border:1px solid var(--line);background:#fff;border-radius:99px;padding:6px 14px;font-size:13px;transition:.3s var(--ease)}
+.chip.on{background:var(--navy);border-color:var(--navy);color:#fff}
+.chart-box{position:relative;height:210px}
+.hrow{display:flex;align-items:center;gap:12px;padding:13px 4px;border-bottom:1px solid var(--line);width:100%;background:none;border-left:0;border-right:0;border-top:0;text-align:left}
+.hrow:last-child{border-bottom:0}
+.hdate{width:50px;text-align:center;flex:none;background:var(--navy-soft);border-radius:14px;padding:6px 0}
+.hdate b{display:block;font-size:17px;font-weight:600;line-height:1.1}
+.hdate small{font-size:10.5px;color:var(--muted)}
+.hvals{flex:1;display:grid;grid-template-columns:repeat(5,1fr);gap:2px;text-align:center}
+.hvals span{font-size:13.5px;font-weight:400}
+.hvals small{display:block;font-size:10px;color:var(--muted)}
+
+/* ---------- Profile ---------- */
+.prof{display:flex;align-items:center;gap:14px}
+.avatar{width:62px;height:62px;border-radius:22px;background:linear-gradient(135deg,var(--navy3),var(--navy));color:#fff;display:grid;place-items:center;font-size:24px;font-weight:500;flex:none;position:relative}
+.avatar::after{content:"";position:absolute;inset:-4px;border-radius:26px;border:2px solid var(--orange);opacity:.4}
+.prof h2{margin:0;font-size:19px;font-weight:500}
+.prof p{margin:2px 0 0;font-size:13px;color:var(--muted)}
+.kv{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--line);font-size:14px}
+.kv:last-child{border:0}
+.kv span:first-child{color:var(--muted)}
+.goal-track{height:10px;border-radius:9px;background:var(--navy-soft);overflow:hidden;margin:10px 0 6px}
+.goal-fill{height:100%;width:0;background:linear-gradient(90deg,var(--orange2),var(--orange3));border-radius:9px;transition:width 1.4s var(--ease)}
+.formula{font-size:12.5px;color:var(--ink2);line-height:1.6;padding:10px 0;border-bottom:1px dashed var(--line)}
+.formula:last-child{border:0}
+.formula b{color:var(--navy)}
+
+/* ---------- Buttons ---------- */
+.btn{position:relative;overflow:hidden;border:0;border-radius:16px;padding:14px 18px;font-size:15px;font-weight:400;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:transform .2s var(--ease),box-shadow .3s}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:linear-gradient(135deg,var(--orange2),var(--orange) 55%,var(--orange3));color:#fff;box-shadow:0 12px 24px -10px rgba(255,122,26,.8)}
+.btn-navy{background:var(--navy);color:#fff}
+.btn-ghost{background:var(--navy-soft);color:var(--navy)}
+.btn-danger{background:#FDECEC;color:var(--bad)}
+.btn-block{width:100%}
+.btn[disabled]{opacity:.7;pointer-events:none}
+.btn .spin{width:18px;height:18px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:rot .8s linear infinite}
+@keyframes rot{to{transform:rotate(360deg)}}
+.ripple{position:absolute;border-radius:50%;background:rgba(255,255,255,.45);transform:scale(0);animation:rip .6s ease-out;pointer-events:none}
+@keyframes rip{to{transform:scale(4);opacity:0}}
+.row{display:flex;gap:10px}
+.row>*{flex:1}
+
+/* ---------- Nav ---------- */
+.nav{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(12px + var(--sb));width:calc(100% - 24px);max-width:496px;height:68px;background:rgba(11,31,58,.94);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-radius:26px;display:grid;grid-template-columns:repeat(5,1fr);align-items:center;z-index:40;box-shadow:0 20px 44px -14px rgba(11,31,58,.6)}
+.nav .tab{background:none;border:0;color:rgba(255,255,255,.5);font-size:10.5px;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 0;position:relative;transition:color .3s}
+.nav .tab .ic{transition:transform .4s var(--ease),color .3s}
+.nav .tab.active{color:#fff}
+.nav .tab.active .ic{color:var(--orange2);transform:translateY(-2px)}
+.nav .tab::after{content:"";position:absolute;bottom:2px;width:4px;height:4px;border-radius:50%;background:var(--orange);transform:scale(0);transition:transform .35s var(--ease)}
+.nav .tab.active::after{transform:scale(1)}
+.fab{width:60px;height:60px;border-radius:21px;border:0;margin:-36px auto 0;display:grid;place-items:center;color:#fff;
+  background:linear-gradient(135deg,var(--orange2),var(--orange) 50%,var(--orange3));box-shadow:0 14px 28px -8px rgba(255,122,26,.75),0 0 0 6px var(--bg);transition:transform .3s var(--ease)}
+.fab:active{transform:scale(.92) rotate(90deg)}
+.fab .ic{width:28px;height:28px;stroke-width:2.2}
+
+/* ---------- Sheet ---------- */
+.overlay{position:fixed;inset:0;background:rgba(6,16,32,.5);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);opacity:0;pointer-events:none;transition:opacity .35s;z-index:60}
+.overlay.show{opacity:1;pointer-events:auto}
+.sheet{position:fixed;left:0;right:0;bottom:0;margin:0 auto;max-width:520px;max-height:93vh;background:#fff;border-radius:30px 30px 0 0;transform:translateY(105%);transition:transform .5s var(--ease);z-index:61;display:flex;flex-direction:column;padding-bottom:var(--sb)}
+.sheet:not(.open){visibility:hidden;transition:transform .5s var(--ease),visibility 0s .5s}
+.sheet.open{transform:none}
+.sheet.drag{transition:none}
+.sheet-handle{padding:10px 0 6px;display:grid;place-items:center;touch-action:none}
+.sheet-handle span{width:44px;height:5px;border-radius:9px;background:#D9DEE7}
+.sheet-body{overflow-y:auto;padding:4px 20px 26px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+.sheet-title{display:flex;align-items:center;justify-content:space-between;margin:4px 0 16px}
+.sheet-title h2{margin:0;font-size:20px;font-weight:500}
+.xbtn{width:36px;height:36px;border-radius:12px;border:0;background:var(--navy-soft);display:grid;place-items:center;color:var(--navy)}
+.xbtn .ic{width:18px;height:18px}
+
+.choose{display:grid;gap:12px}
+.choose button{display:flex;align-items:center;gap:14px;border:0;border-radius:20px;padding:18px;text-align:left;background:var(--navy-soft);transition:transform .2s var(--ease)}
+.choose button:active{transform:scale(.97)}
+.choose button:first-child{background:linear-gradient(135deg,var(--navy2),var(--navy));color:#fff}
+.choose .cic{width:50px;height:50px;border-radius:16px;display:grid;place-items:center;background:linear-gradient(135deg,var(--orange2),var(--orange3));color:#fff;flex:none}
+.choose b{display:block;font-size:16px;font-weight:500}
+.choose small{font-size:12.5px;opacity:.65}
+
+/* ---------- Forms ---------- */
+.field{margin-bottom:14px}
+.field label{display:block;font-size:12.5px;color:var(--muted);margin:0 0 6px 2px}
+.inp{width:100%;border:1.5px solid var(--line);background:#FAFBFD;border-radius:14px;padding:12px 14px;font-size:16px;font-weight:300;outline:none;transition:border-color .25s,box-shadow .25s,background .25s;-webkit-appearance:none;appearance:none}
+.inp:focus{border-color:var(--orange);background:#fff;box-shadow:0 0 0 4px rgba(255,122,26,.12)}
+textarea.inp{resize:none;min-height:70px}
+select.inp{background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);background-position:calc(100% - 20px) 52%,calc(100% - 15px) 52%;background-size:5px 5px;background-repeat:no-repeat;padding-right:36px}
+.unit{position:relative}
+.unit .inp{padding-right:46px}
+.unit em{position:absolute;right:14px;top:50%;transform:translateY(-50%);font-style:normal;font-size:12px;color:var(--muted);pointer-events:none}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.typechips{display:flex;flex-wrap:wrap;gap:8px}
+.typechips input{display:none}
+.typechips label{margin:0;border:1.5px solid var(--line);border-radius:99px;padding:7px 14px;font-size:13.5px;color:var(--ink2);display:inline-flex;align-items:center;gap:6px;transition:.25s var(--ease)}
+.typechips label::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--tc)}
+.typechips input:checked+label{background:var(--navy);border-color:var(--navy);color:#fff}
+.seg{display:flex;background:var(--navy-soft);border-radius:14px;padding:4px}
+.seg input{display:none}
+.seg label{flex:1;margin:0;text-align:center;padding:9px;border-radius:11px;font-size:14px;color:var(--ink2);transition:.3s var(--ease)}
+.seg input:checked+label{background:#fff;color:var(--navy);box-shadow:0 4px 12px -4px rgba(11,31,58,.25);font-weight:400}
+.photo-pick{position:relative;height:200px;border-radius:20px;border:2px dashed #FFC9A1;background:var(--orange-soft);display:grid;place-items:center;overflow:hidden;margin-bottom:16px;cursor:pointer}
+.photo-pick .ph-ph{text-align:center;color:var(--orange3);font-size:13.5px}
+.photo-pick .ph-ph .ic{width:34px;height:34px;display:block;margin:0 auto 6px}
+.photo-pick img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;animation:fadeIn .5s}
+.photo-pick.has{border-style:solid;border-color:transparent}
+.photo-actions{position:absolute;right:10px;bottom:10px;display:flex;gap:8px;z-index:2}
+.photo-actions[hidden]{display:none}
+.photo-actions button{border:0;border-radius:12px;padding:7px 12px;font-size:12.5px;background:rgba(11,31,58,.75);color:#fff;backdrop-filter:blur(6px)}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.hint{font-size:12px;color:var(--muted);margin:-6px 2px 14px;display:flex;justify-content:space-between;align-items:center}
+
+/* ---------- Detail ---------- */
+.detail-photo{height:250px;border-radius:22px;margin-bottom:16px}
+.dmacro{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:14px 0}
+.dmacro div{background:var(--navy-soft);border-radius:16px;padding:10px 4px;text-align:center}
+.dmacro div:first-child{background:linear-gradient(135deg,var(--orange2),var(--orange3));color:#fff}
+.dmacro b{display:block;font-size:18px;font-weight:600}
+.dmacro small{font-size:11px;opacity:.7}
+.note{background:#FAFBFD;border:1px solid var(--line);border-radius:14px;padding:12px 14px;font-size:14px;color:var(--ink2);white-space:pre-wrap;margin-bottom:16px}
+
+/* ---------- PIN ---------- */
+#pin{position:fixed;inset:0;z-index:80;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:calc(30px + var(--st)) 24px calc(30px + var(--sb));color:#fff;
+  background:radial-gradient(120% 70% at 85% 0%,rgba(255,122,26,.35),transparent 60%),linear-gradient(170deg,#13294B,#0B1F3A 70%);
+  opacity:0;visibility:hidden;transform:scale(1.04);transition:opacity .4s var(--ease),transform .4s var(--ease),visibility .4s}
+#pin.show{opacity:1;visibility:visible;transform:none}
+#pin .pclose{position:absolute;top:calc(16px + var(--st));right:16px;background:rgba(255,255,255,.1);color:#fff}
+.plock{width:64px;height:64px;border-radius:22px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);display:grid;place-items:center;margin-bottom:18px}
+.plock .ic{width:28px;height:28px;color:var(--orange2)}
+#pin h2{margin:0;font-weight:500;font-size:21px}
+#pin p{margin:6px 0 0;font-size:13px;opacity:.6;min-height:20px;text-align:center}
+#pin p.err{color:#FF9B8F;opacity:1}
+.dots{display:flex;gap:16px;margin:28px 0 36px}
+.dots i{width:14px;height:14px;border-radius:50%;border:1.5px solid rgba(255,255,255,.45);transition:.25s var(--ease)}
+.dots i.f{background:var(--orange);border-color:var(--orange);transform:scale(1.15);box-shadow:0 0 14px rgba(255,122,26,.8)}
+.dots.shake{animation:shake .45s}
+.dots.okk i{background:var(--ok);border-color:var(--ok);box-shadow:0 0 14px rgba(23,166,115,.7)}
+.dots.wait i.f{animation:blink .8s infinite}
+@keyframes blink{50%{opacity:.35}}
+@keyframes shake{20%,60%{transform:translateX(-10px)}40%,80%{transform:translateX(10px)}}
+.keys{display:grid;grid-template-columns:repeat(3,76px);gap:16px 26px}
+.keys button{width:76px;height:76px;border-radius:50%;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:#fff;font-size:28px;font-weight:300;transition:background .2s,transform .15s}
+.keys button:active{background:rgba(255,122,26,.45);transform:scale(.92)}
+.keys button.blank{visibility:hidden}
+.keys button.del{border:0;background:none;display:grid;place-items:center}
+
+/* ---------- Toast ---------- */
+#toast{position:fixed;left:50%;bottom:calc(96px + var(--sb));transform:translate(-50%,20px);background:var(--navy);color:#fff;padding:11px 18px;border-radius:16px;font-size:13.5px;z-index:90;opacity:0;pointer-events:none;transition:.4s var(--ease);box-shadow:0 14px 30px -10px rgba(11,31,58,.6);display:flex;gap:8px;align-items:center;max-width:calc(100% - 40px)}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+#toast.err{background:var(--bad)}
+#toast .ic{width:18px;height:18px;color:var(--orange2)}
+#toast.err .ic{color:#fff}
+
+.skel{background:linear-gradient(90deg,#EEF1F6 25%,#F7F9FC 50%,#EEF1F6 75%);background-size:200% 100%;animation:sk 1.3s infinite;border-radius:20px}
+@keyframes sk{to{background-position:-200% 0}}
+
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+@media (min-width:560px){body{background:linear-gradient(#E9EDF4,#F4F6FA)}}
+</style>
+</head>
+<body>
+
+<div id="splash"><div class="splash-in"><div class="logo"><svg class="ic" viewBox="0 0 24 24"><path d="M7 3v8M4 3v5a3 3 0 0 0 6 0V3M7 11v10M17 21V3c-2.4 0-3.6 3-3.6 7 0 2.2 1.2 3 3.6 3"/></svg></div><h1>MEAL JOURNAL</h1><p>กำลังโหลดข้อมูล…</p></div></div>
+
+<div class="app">
+  <header class="hero">
+    <div class="blob b1"></div><div class="blob b2"></div>
+    <div class="hero-top">
+      <div class="brand"><div class="mark" id="brandMark"></div><span>MEAL JOURNAL</span><span id="demoBadge"></span></div>
+      <button class="mode" id="modeBtn"></button>
+    </div>
+    <div class="hero-text" id="heroText"></div>
+  </header>
+
+  <main class="content">
+    <section class="page active" id="page-home"></section>
+    <section class="page" id="page-meals"></section>
+    <section class="page" id="page-body"></section>
+    <section class="page" id="page-profile"></section>
+  </main>
+</div>
+
+<nav class="nav" id="nav">
+  <button class="tab active" data-go="home"></button>
+  <button class="tab" data-go="meals"></button>
+  <button class="fab" id="fab" aria-label="เพิ่มข้อมูล"></button>
+  <button class="tab" data-go="body"></button>
+  <button class="tab" data-go="profile"></button>
+</nav>
+
+<div class="overlay" id="overlay"></div>
+<div class="sheet" id="sheet"><div class="sheet-handle" id="sheetHandle"><span></span></div><div class="sheet-body" id="sheetBody"></div></div>
+
+<div id="pin">
+  <button class="xbtn pclose" id="pinClose" aria-label="ปิด"></button>
+  <div class="plock" id="pinLock"></div>
+  <h2>ใส่ PIN เพื่อแก้ไขข้อมูล</h2>
+  <p id="pinMsg">ไม่ใส่ PIN จะดูข้อมูลได้อย่างเดียว</p>
+  <div class="dots" id="dots"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+  <div class="keys" id="keys"></div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* =========================================================
+   CONFIG — วาง Web App URL ของ Apps Script (ลงท้าย /exec)
+   ถ้าเว้นว่างไว้ หน้าเว็บจะทำงานในโหมดตัวอย่าง (DEMO)
+   ========================================================= */
+const CONFIG = {
+  API_URL: '',
+  CACHE_KEY: 'mealjournal.cache.v1'
+};
+const DEMO = !CONFIG.API_URL;
+
+/* ---------- helpers ---------- */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const pad = n => String(n).padStart(2, '0');
+const ymd = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+const today = () => ymd(new Date());
+const nowTime = () => { const d = new Date(); return pad(d.getHours()) + ':' + pad(d.getMinutes()); };
+const num = v => { if (v === '' || v === null || v === undefined) return null; const n = parseFloat(v); return isFinite(n) ? n : null; };
+const fmt = (v, d = 0) => (v === null || v === undefined || isNaN(v)) ? '—' : Number(v).toLocaleString('th-TH', { minimumFractionDigits: d, maximumFractionDigits: d });
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const parseD = s => { const [y, m, d] = String(s).split('-').map(Number); return new Date(y, (m || 1) - 1, d || 1); };
+const thDate = (s, o = { day: 'numeric', month: 'short' }) => parseD(s).toLocaleDateString('th-TH', o);
+const addDays = (s, n) => { const d = parseD(s); d.setDate(d.getDate() + n); return ymd(d); };
+const store = { get(k) { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} } };
+const sess = { get(k) { try { return sessionStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { v == null ? sessionStorage.removeItem(k) : sessionStorage.setItem(k, v); } catch (e) {} } };
+
+/* ---------- icons ---------- */
+const IC = {
+  home: '<path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+  meal: '<path d="M7 3v8M4 3v5a3 3 0 0 0 6 0V3M7 11v10M17 21V3c-2.4 0-3.6 3-3.6 7 0 2.2 1.2 3 3.6 3"/>',
+  body: '<path d="M12 2.5a2.2 2.2 0 1 1 0 4.4 2.2 2.2 0 0 1 0-4.4zM5 9.5l7 1.5 7-1.5M12 11v4.5M12 15.5 9 21.5M12 15.5l3 6"/>',
+  user: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  lock: '<rect x="4.5" y="10.5" width="15" height="10.5" rx="3"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/>',
+  unlock: '<rect x="4.5" y="10.5" width="15" height="10.5" rx="3"/><path d="M8 10.5V7.5a4 4 0 0 1 7.6-1.8"/>',
+  eye: '<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+  camera: '<path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13.5" r="3.5"/>',
+  trash: '<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>',
+  edit: '<path d="M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4"/>',
+  x: '<path d="M6 6l12 12M18 6 6 18"/>',
+  back: '<path d="M21 6H9l-6 6 6 6h12zM13 10l4 4M17 10l-4 4"/>',
+  ruler: '<path d="M3 17 17 3l4 4L7 21zM7 13l2 2M10 10l2 2M13 7l2 2"/>',
+  check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+  info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>',
+  refresh: '<path d="M20 11a8 8 0 0 0-14.3-4.5L4 8M4 4v4h4M4 13a8 8 0 0 0 14.3 4.5L20 16M20 20v-4h-4"/>',
+  flame: '<path d="M12 21c4 0 7-2.8 7-6.8 0-3.7-2.6-6-4.4-8.7-.4 2.2-1.6 3.4-3 4.2C11.8 7 10.8 4.6 9 3c0 4-4 6.2-4 11.2C5 18.2 8 21 12 21z"/>'
+};
+const icon = (n, cls = '') => `<svg class="ic ${cls}" viewBox="0 0 24 24">${IC[n] || ''}</svg>`;
+
+const MEAL_TYPES = [
+  { k: 'มื้อเช้า', c: '#FFB547', g: ['#FFE2B3', '#FFB547'] },
+  { k: 'มื้อกลางวัน', c: '#FF7A1A', g: ['#FFC9A1', '#FF7A1A'] },
+  { k: 'มื้อเย็น', c: '#1F3B68', g: ['#5B7BB0', '#13294B'] },
+  { k: 'มื้อว่าง', c: '#8A9BB8', g: ['#D6DEEA', '#8A9BB8'] },
+  { k: 'Meal Replacement', c: '#F05A0A', g: ['#FF9A4D', '#C8460A'] }
+];
+const WD = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
+const wdName = s => WD[parseD(s).getDay()];
+const typeOf = k => MEAL_TYPES.find(t => t.k === k) || MEAL_TYPES[1];
+const guessType = t => { const h = +String(t || nowTime()).split(':')[0]; return h < 11 ? 'มื้อเช้า' : h < 15 ? 'มื้อกลางวัน' : h < 17 ? 'มื้อว่าง' : 'มื้อเย็น'; };
+const METRICS = [
+  { k: 'weight', th: 'น้ำหนัก', u: 'กก.' },
+  { k: 'waist', th: 'รอบเอว', u: 'ซม.' },
+  { k: 'hip', th: 'สะโพก', u: 'ซม.' },
+  { k: 'arm', th: 'ต้นแขน', u: 'ซม.' },
+  { k: 'thigh', th: 'ต้นขา', u: 'ซม.' }
+];
+const ACTIVITY = [
+  [1.2, 'นั่งทำงาน ไม่ค่อยออกกำลังกาย'],
+  [1.375, 'ออกกำลังเบา 1–3 วัน/สัปดาห์'],
+  [1.55, 'ออกกำลังปานกลาง 3–5 วัน/สัปดาห์'],
+  [1.725, 'ออกกำลังหนัก 6–7 วัน/สัปดาห์'],
+  [1.9, 'หนักมาก / ใช้แรงงาน']
+];
+
+/* ---------- state ---------- */
+const S = { profile: {}, body: [], meals: [], unlocked: false, pin: null, page: 'home', selDate: today(), metric: 'weight', loaded: false };
+
+/* ---------- API ---------- */
+async function apiGet() {
+  if (DEMO) return { ok: true, data: demoStore() };
+  const r = await fetch(CONFIG.API_URL + '?action=all&t=' + Date.now());
+  return r.json();
+}
+async function apiPost(payload) {
+  if (DEMO) return demoPost(payload);
+  const r = await fetch(CONFIG.API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) });
+  return r.json();
+}
+
+/* ---------- DEMO data ---------- */
+let _demo = null;
+function demoStore() {
+  if (_demo) return _demo;
+  const body = [], meals = [], t = today();
+  for (let i = 7; i >= 0; i--) {
+    const k = 7 - i;
+    body.push({ id: 'b' + i, date: addDays(t, -i * 7), weight: +(68.6 - k * 0.45).toFixed(1), waist: +(83 - k * 0.6).toFixed(1), hip: +(99 - k * 0.35).toFixed(1), arm: +(29.6 - k * 0.15).toFixed(1), thigh: +(56.4 - k * 0.3).toFixed(1), note: '', createdAt: '' });
+  }
+  const pool = [
+    ['มื้อเช้า', '07:50', 'กรีกโยเกิร์ต กราโนล่า เบอร์รี่', 380, 22, 48, 10],
+    ['Meal Replacement', '08:30', 'เชคโปรตีนวานิลลา', 220, 25, 15, 6],
+    ['มื้อกลางวัน', '12:20', 'ข้าวกล้องอกไก่ย่าง สลัดผัก', 540, 42, 55, 14],
+    ['มื้อว่าง', '15:30', 'อัลมอนด์อบ 1 กำมือ', 170, 6, 6, 15],
+    ['มื้อเย็น', '18:45', 'แซลมอนย่าง ผักโขม มันหวาน', 610, 38, 42, 28],
+    ['มื้อกลางวัน', '12:10', 'ส้มตำไทย ไก่ย่าง ข้าวเหนียว', 650, 35, 80, 18],
+    ['มื้อเย็น', '19:00', 'ต้มยำกุ้งน้ำใส ข้าวสวย', 480, 30, 60, 10]
+  ];
+  for (let i = 6; i >= 0; i--) {
+    const d = addDays(t, -i);
+    const pick = i === 0 ? [1, 2, 3] : [i % 2 ? 0 : 1, i % 3 ? 2 : 5, 3, i % 2 ? 4 : 6];
+    pick.forEach((p, j) => { const m = pool[p]; meals.push({ id: 'm' + i + j, date: d, time: m[1], type: m[0], name: m[2], kcal: m[3], protein: m[4], carb: m[5], fat: m[6], photoUrl: '', photoId: '', note: '' }); });
+  }
+  _demo = { body, meals, profile: { name: 'ผู้ใช้ทดลอง', sex: 'female', age: 32, height: 162, activity: 1.375, targetWeight: 60, targetKcal: '' } };
+  return _demo;
+}
+async function demoPost(p) {
+  await new Promise(r => setTimeout(r, 500));
+  const d = demoStore();
+  if (p.action === 'verify') return /^\d{6}$/.test(p.pin) ? { ok: true } : { ok: false, code: 'BAD_PIN', error: 'PIN ไม่ถูกต้อง' };
+  const save = (arr, data, extra) => { const o = Object.assign({}, arr.find(x => x.id === data.id) || {}, data, extra || {}); if (!o.id) o.id = 'x' + Date.now(); return o; };
+  if (p.action === 'saveMeal') return { ok: true, item: save(d.meals, p.data, p.photoData ? { photoUrl: p.photoData } : p.removePhoto ? { photoUrl: '' } : null) };
+  if (p.action === 'saveBody') return { ok: true, item: save(d.body, p.data) };
+  if (p.action === 'saveProfile') return { ok: true, item: p.data };
+  return { ok: true, item: { id: p.id } };
+}
+
+/* ---------- data ---------- */
+function applyData(d) { S.profile = d.profile || {}; S.body = d.body || []; S.meals = d.meals || []; }
+function upsertLocal(arr, item) { const i = arr.findIndex(x => x.id === item.id); i > -1 ? arr.splice(i, 1, item) : arr.push(item); }
+function cacheNow() { if (!DEMO) store.set(CONFIG.CACHE_KEY, { profile: S.profile, body: S.body, meals: S.meals }); }
+const sortedBody = () => [...S.body].sort((a, b) => a.date < b.date ? -1 : a.date > b.date ? 1 : String(a.createdAt).localeCompare(String(b.createdAt)));
+const mealsOn = d => S.meals.filter(m => m.date === d).sort((a, b) => String(a.time).localeCompare(String(b.time)));
+const sumMeals = arr => arr.reduce((s, m) => ({ kcal: s.kcal + (num(m.kcal) || 0), protein: s.protein + (num(m.protein) || 0), carb: s.carb + (num(m.carb) || 0), fat: s.fat + (num(m.fat) || 0) }), { kcal: 0, protein: 0, carb: 0, fat: 0 });
+function seriesOf(k) { return sortedBody().filter(r => num(r[k]) !== null).map(r => ({ date: r.date, v: num(r[k]) })); }
+
+function calc() {
+  const p = S.profile, h = num(p.height), age = num(p.age), sex = p.sex;
+  const last = k => { const s = seriesOf(k); return s.length ? s[s.length - 1].v : null; };
+  const w = last('weight'), waist = last('waist'), hip = last('hip');
+  const r = { w, waist, hip, h, sex };
+  r.bmi = w && h ? w / ((h / 100) ** 2) : null;
+  r.whr = waist && hip ? waist / hip : null;
+  r.whtr = waist && h ? waist / h : null;
+  r.rfm = waist && h && sex ? (sex === 'male' ? 64 : 76) - 20 * (h / waist) : null;
+  r.bmr = w && h && age && sex ? 10 * w + 6.25 * h - 5 * age + (sex === 'male' ? 5 : -161) : null;
+  r.tdee = r.bmr ? r.bmr * (num(p.activity) || 1.2) : null;
+  const tw = num(p.targetWeight);
+  r.auto = r.tdee ? Math.round(r.tdee - (tw && w && tw < w ? 500 : tw && w && tw > w ? -300 : 0)) : null;
+  r.target = num(p.targetKcal) || r.auto || 1800;
+  r.macroT = { p: r.target * 0.3 / 4, c: r.target * 0.4 / 4, f: r.target * 0.3 / 9 };
+  return r;
+}
+function bmiLabel(b) { if (b == null) return ['', '']; if (b < 18.5) return ['น้ำหนักน้อย', 'warn']; if (b < 23) return ['สมส่วน', 'good']; if (b < 25) return ['ท้วม', 'warn']; if (b < 30) return ['อ้วน', 'bad']; return ['อ้วนมาก', 'bad']; }
+function whrLabel(v, sex) { if (v == null) return ['', '']; const lim = sex === 'male' ? 0.9 : 0.85; return v <= lim ? ['ความเสี่ยงต่ำ', 'good'] : ['ความเสี่ยงสูง', 'bad']; }
+function whtrLabel(v) { if (v == null) return ['', '']; return v < 0.5 ? ['อยู่ในเกณฑ์ดี', 'good'] : v < 0.6 ? ['ควรระวัง', 'warn'] : ['ความเสี่ยงสูง', 'bad']; }
+function rfmLabel(v, sex) { if (v == null) return ['', '']; const [a, b] = sex === 'male' ? [25, 30] : [32, 38]; return v < a ? ['ปกติ', 'good'] : v < b ? ['ค่อนข้างสูง', 'warn'] : ['สูง', 'bad']; }
+
+/* ---------- UI primitives ---------- */
+function animateCounts(root) {
+  $$('[data-count]', root).forEach(el => {
+    const to = parseFloat(el.dataset.count), dec = +el.dataset.dec || 0;
+    if (!isFinite(to)) { el.textContent = '—'; return; }
+    const t0 = performance.now(), dur = 1000;
+    const step = t => { const k = Math.min((t - t0) / dur, 1), e = 1 - Math.pow(1 - k, 3); el.textContent = fmt(to * e, dec); if (k < 1) requestAnimationFrame(step); };
+    requestAnimationFrame(step);
+  });
+}
+function afterPaint(fn) { requestAnimationFrame(() => requestAnimationFrame(fn)); }
+let toastT;
+function toast(msg, type = '') {
+  const t = $('#toast'); t.className = type; t.innerHTML = icon(type === 'err' ? 'info' : 'check') + '<span>' + esc(msg) + '</span>';
+  afterPaint(() => t.classList.add('show')); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2600);
+}
+function photoBox(m, cls = '') {
+  const t = typeOf(m.type);
+  const img = m.photoUrl ? `<img src="${esc(m.photoUrl)}" alt="" loading="lazy" referrerpolicy="no-referrer" onload="this.classList.add('ok')" onerror="this.classList.add('err')">` : '';
+  return `<div class="phbox ${cls}" style="--c1:${t.g[0]};--c2:${t.g[1]}">${icon('meal')}${img}</div>`;
+}
+function setBtnLoading(btn, on, label) {
+  if (on) { btn.dataset.label = btn.innerHTML; btn.innerHTML = '<span class="spin"></span>' + (label || 'กำลังบันทึก…'); btn.disabled = true; }
+  else { btn.innerHTML = btn.dataset.label || btn.innerHTML; btn.disabled = false; }
+}
+document.addEventListener('pointerdown', e => {
+  const b = e.target.closest('.btn,.fab,.choose button'); if (!b) return;
+  const r = b.getBoundingClientRect(), s = Math.max(r.width, r.height), sp = document.createElement('span');
+  sp.className = 'ripple'; sp.style.cssText = `width:${s}px;height:${s}px;left:${e.clientX - r.left - s / 2}px;top:${e.clientY - r.top - s / 2}px`;
+  b.appendChild(sp); setTimeout(() => sp.remove(), 650);
+});
+
+/* ---------- charts ---------- */
+const charts = {};
+function makeChart(id, cfg) {
+  if (!window.Chart) return; const cv = document.getElementById(id); if (!cv) return;
+  if (charts[id]) charts[id].destroy();
+  Chart.defaults.font.family = 'Kanit'; Chart.defaults.color = '#8792A6';
+  charts[id] = new Chart(cv, cfg);
+}
+const tooltipStyle = { backgroundColor: '#0B1F3A', padding: 10, cornerRadius: 12, titleFont: { weight: '400' }, displayColors: false };
+
+/* ---------- Hero ---------- */
+const PAGE_TITLES = { meals: ['บันทึกทุกจาน', 'มื้ออาหาร'], body: ['ติดตามความเปลี่ยนแปลง', 'สัดส่วนร่างกาย'], profile: ['ข้อมูลสำหรับคำนวณ', 'โปรไฟล์'] };
+function renderHero() {
+  const h = new Date().getHours();
+  const greet = h < 5 ? 'ราตรีสวัสดิ์' : h < 12 ? 'อรุณสวัสดิ์' : h < 17 ? 'สวัสดีตอนบ่าย' : h < 21 ? 'สวัสดีตอนเย็น' : 'ราตรีสวัสดิ์';
+  const name = S.profile.name ? esc(S.profile.name) : 'คุณ';
+  const ht = $('#heroText');
+  ht.innerHTML = S.page === 'home'
+    ? `<small>${new Date().toLocaleDateString('th-TH', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</small><h1>${greet},<br><span>${name}</span></h1>`
+    : `<small>${PAGE_TITLES[S.page][0]}</small><h1>${PAGE_TITLES[S.page][1]}</h1>`;
+  ht.classList.remove('swap'); void ht.offsetWidth; ht.classList.add('swap');
+  const mb = $('#modeBtn');
+  mb.className = 'mode' + (S.unlocked ? ' on' : '');
+  mb.innerHTML = S.unlocked ? icon('unlock') + 'แก้ไขได้' : icon('eye') + 'ดูอย่างเดียว';
+  $('#demoBadge').innerHTML = DEMO ? '<span class="demo-badge">DEMO</span>' : '';
+}
+
+/* ---------- Home ---------- */
+function macroBar(lbl, v, t, cls) {
+  return `<div class="mbar"><div class="mbar-top"><span>${lbl}</span><span>${fmt(v)} / ${fmt(t)} ก.</span></div><div class="mbar-track"><div class="mbar-fill ${cls}" data-w="${Math.min(100, t ? v / t * 100 : 0)}"></div></div></div>`;
+}
+function statTile(lbl, v, dec, unit, label, cls = '', d = 0) {
+  const val = v == null ? '—' : `<span data-count="${v}" data-dec="${dec}">0</span>`;
+  return `<div class="stat ${cls} reveal" style="--d:${d}"><div class="lbl">${lbl}</div><div class="val">${val}${v == null ? '' : `<small>${unit}</small>`}</div>${label && label[0] ? `<span class="pill ${label[1]}">${label[0]}</span>` : ''}</div>`;
+}
+function renderHome() {
+  const el = $('#page-home'), c = calc(), t = today(), tm = mealsOn(t), sum = sumMeals(tm);
+  const remain = c.target - sum.kcal, ws = seriesOf('weight');
+  const wd = ws.length > 1 ? ws[ws.length - 1].v - ws[ws.length - 2].v : null;
+  const wLabel = wd == null ? null : [(wd <= 0 ? '▼ ' : '▲ ') + fmt(Math.abs(wd), 1) + ' กก.', wd <= 0 ? 'good' : 'warn'];
+  const needProfile = !num(S.profile.height) || !S.profile.sex || !num(S.profile.age);
+
+  el.innerHTML = `
+    <section class="card ring-card reveal" style="--d:0">
+      <div class="ring-wrap">
+        <svg viewBox="0 0 120 120" class="ring"><defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFA05C"/><stop offset="1" stop-color="#F05A0A"/></linearGradient></defs>
+          <circle cx="60" cy="60" r="52" class="ring-bg"/><circle cx="60" cy="60" r="52" class="ring-fg ${remain < 0 ? 'over' : ''}" id="ringFg"/></svg>
+        <div class="ring-center"><small>วันนี้กินไป</small><b data-count="${sum.kcal}">0</b><small>จาก ${fmt(c.target)} kcal</small></div>
+      </div>
+      <div class="ring-side">
+        <div class="remain ${remain < 0 ? 'over' : ''}"><small>${remain >= 0 ? 'เหลืออีก' : 'เกินเป้าหมาย'}</small><b data-count="${Math.abs(remain)}">0</b><span>kcal</span></div>
+        ${macroBar('โปรตีน', sum.protein, c.macroT.p, 'p')}${macroBar('คาร์บ', sum.carb, c.macroT.c, 'c')}${macroBar('ไขมัน', sum.fat, c.macroT.f, 'f')}
+      </div>
+    </section>
+    ${needProfile ? `<section class="card banner reveal" style="--d:1">${icon('info')}<p>ตั้งค่า <b>เพศ อายุ ส่วนสูง</b> ในโปรไฟล์ เพื่อคำนวณ BMI, %ไขมัน และแคลอรี่ที่ควรได้รับ</p><button class="link" data-go="profile">ตั้งค่า</button></section>` : ''}
+    <div class="stats">
+      ${statTile('น้ำหนักล่าสุด', c.w, 1, 'กก.', wLabel, 'dark', 1)}
+      ${statTile('BMI', c.bmi, 1, '', bmiLabel(c.bmi), '', 2)}
+      ${statTile('% ไขมัน (RFM)', c.rfm, 1, '%', rfmLabel(c.rfm, c.sex), '', 3)}
+      ${statTile('เอว / สะโพก', c.whr, 2, '', whrLabel(c.whr, c.sex), '', 4)}
+      ${statTile('เอว / ส่วนสูง', c.whtr, 2, '', whtrLabel(c.whtr), '', 5)}
+      ${statTile('TDEE', c.tdee, 0, 'kcal', c.tdee ? ['BMR ' + fmt(c.bmr), ''] : null, '', 6)}
+    </div>
+    <div class="sec-h reveal" style="--d:6"><h3>มื้อวันนี้</h3><button class="link" data-go="meals">ดูทั้งหมด</button></div>
+    ${tm.length ? `<div class="hscroll reveal" style="--d:7">${tm.map(m => `<button class="mini" data-meal="${esc(m.id)}">${photoBox(m)}<div class="mi-b"><span class="tag" style="--tc:${typeOf(m.type).c}">${esc(m.type)} · ${esc(m.time)}</span><h4>${esc(m.name)}</h4><div class="k"><b>${fmt(num(m.kcal))}</b> kcal</div></div></button>`).join('')}</div>`
+      : `<div class="card empty reveal" style="--d:7"><div class="eic">${icon('meal')}</div><p>ยังไม่มีบันทึกมื้ออาหารวันนี้</p><button class="btn btn-primary" data-add="meal">${icon('camera')}บันทึกมื้อแรก</button></div>`}
+    <div class="sec-h reveal" style="--d:8"><h3>แคลอรี่ 7 วันล่าสุด</h3><span class="muted" style="font-size:12px">เป้า ${fmt(c.target)} kcal</span></div>
+    <section class="card reveal" style="--d:9"><div class="chart-box" style="height:190px"><canvas id="weekChart"></canvas></div></section>`;
+
+  animateCounts(el);
+  afterPaint(() => {
+    const p = Math.min(sum.kcal / c.target, 1); const fg = $('#ringFg'); if (fg) fg.style.strokeDashoffset = 326.73 * (1 - p);
+    $$('.mbar-fill', el).forEach(b => b.style.width = b.dataset.w + '%');
+  });
+
+  const days = [...Array(7)].map((_, i) => addDays(t, i - 6));
+  makeChart('weekChart', {
+    data: {
+      labels: days.map(wdName),
+      datasets: [
+        { type: 'bar', data: days.map(d => sumMeals(mealsOn(d)).kcal), borderRadius: 10, borderSkipped: false, maxBarThickness: 26,
+          backgroundColor: days.map(d => d === t ? '#FF7A1A' : 'rgba(31,59,104,.85)') },
+        { type: 'line', data: days.map(() => c.target), borderColor: '#FFA05C', borderDash: [5, 5], borderWidth: 1.5, pointRadius: 0 }
+      ]
+    },
+    options: { maintainAspectRatio: false, animation: { duration: 1100, easing: 'easeOutQuart' }, plugins: { legend: { display: false }, tooltip: { ...tooltipStyle, filter: i => i.datasetIndex === 0, callbacks: { label: i => fmt(i.raw) + ' kcal' } } },
+      scales: { x: { grid: { display: false }, border: { display: false } }, y: { beginAtZero: true, grid: { color: '#EEF1F6' }, border: { display: false }, ticks: { maxTicksLimit: 4 } } } }
+  });
+}
+
+/* ---------- Meals ---------- */
+function renderMeals() {
+  const el = $('#page-meals'), t = today();
+  const days = [...Array(21)].map((_, i) => addDays(t, -i)).reverse();
+  const has = new Set(S.meals.map(m => m.date));
+  const sel = S.selDate;
+  let listHTML = '';
+  if (sel === 'all') {
+    const dates = [...new Set(S.meals.map(m => m.date))].sort().reverse();
+    listHTML = dates.length ? dates.map((d, gi) => {
+      const ms = mealsOn(d), s = sumMeals(ms);
+      return `<div class="dgroup-h reveal" style="--d:${gi + 2}"><span>${thDate(d, { weekday: 'long', day: 'numeric', month: 'long' })}</span><span>${fmt(s.kcal)} kcal</span></div><div class="timeline">${ms.map((m, i) => mealCard(m, gi + i + 2)).join('')}</div>`;
+    }).join('') : emptyMeals();
+  } else {
+    const ms = mealsOn(sel), s = sumMeals(ms);
+    listHTML = `<section class="card daysum reveal" style="--d:1"><div><b class="o" data-count="${s.kcal}">0</b><small>kcal</small></div><div><b data-count="${s.protein}">0</b><small>โปรตีน ก.</small></div><div><b data-count="${s.carb}">0</b><small>คาร์บ ก.</small></div><div><b data-count="${s.fat}">0</b><small>ไขมัน ก.</small></div></section>
+      <div class="dgroup-h reveal" style="--d:2"><span>${thDate(sel, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</span><span>${ms.length} มื้อ</span></div>
+      ${ms.length ? `<div class="timeline">${ms.map((m, i) => mealCard(m, i + 3)).join('')}</div>` : emptyMeals()}`;
+  }
+  el.innerHTML = `<div class="datestrip reveal" id="dstrip" style="--d:0">
+      <button class="dchip all ${sel === 'all' ? 'on' : ''}" data-date="all"><small>ดู</small><b>ทั้งหมด</b></button>
+      ${days.map(d => { const dd = parseD(d); return `<button class="dchip ${d === sel ? 'on' : ''}" data-date="${d}"><small>${wdName(d)}</small><b>${dd.getDate()}</b>${has.has(d) ? '<i></i>' : ''}</button>`; }).join('')}
+    </div>${listHTML}`;
+  animateCounts(el);
+  const on = $('.dchip.on', el); if (on) on.scrollIntoView({ inline: 'center', block: 'nearest' });
+  window.scrollTo(0, 0);
+}
+function mealCard(m, d) {
+  const t = typeOf(m.type);
+  return `<button class="mcard reveal" style="--d:${d};--tc:${t.c}" data-meal="${esc(m.id)}">${photoBox(m)}<div class="mc-b"><div class="mc-top"><span class="tag" style="--tc:${t.c}">${esc(m.type)}</span><time>${esc(m.time)}</time></div><h4>${esc(m.name)}</h4>
+    <div class="macros"><span><b>${fmt(num(m.kcal))}</b> kcal</span><span>P <em>${fmt(num(m.protein))}</em></span><span>C <em>${fmt(num(m.carb))}</em></span><span>F <em>${fmt(num(m.fat))}</em></span></div></div></button>`;
+}
+const emptyMeals = () => `<div class="card empty reveal" style="--d:3"><div class="eic">${icon('meal')}</div><p>ยังไม่มีบันทึกในวันนี้</p><button class="btn btn-primary" data-add="meal">${icon('camera')}เพิ่มมื้ออาหาร</button></div>`;
+
+/* ---------- Body ---------- */
+function renderBody() {
+  const el = $('#page-body'), rows = sortedBody();
+  const tiles = METRICS.map((m, i) => {
+    const s = seriesOf(m.k), last = s.length ? s[s.length - 1].v : null;
+    const prev = s.length > 1 ? s[s.length - 2].v : null, first = s.length > 1 ? s[0].v : null;
+    const d = prev != null ? last - prev : null, tot = first != null ? last - first : null;
+    const pill = d == null ? '' : `<span class="pill ${d <= 0 ? 'good' : 'warn'}">${d <= 0 ? '▼' : '▲'} ${fmt(Math.abs(d), 1)} จากครั้งก่อน</span>`;
+    const totTxt = tot == null ? '' : `<div class="lbl" style="margin-top:6px">รวม ${tot > 0 ? '+' : ''}${fmt(tot, 1)} ${m.u}</div>`;
+    if (i === 0) return `<div class="stat dark reveal" style="--d:0"><div><div class="lbl">${m.th}ล่าสุด</div><div class="val" style="font-size:32px">${last == null ? '—' : `<span data-count="${last}" data-dec="1">0</span><small>${m.u}</small>`}</div>${pill}</div><div style="text-align:right;position:relative;z-index:1">${totTxt}<div class="lbl">${rows.length ? 'อัปเดต ' + thDate(rows[rows.length - 1].date) : ''}</div></div></div>`;
+    return `<div class="stat reveal" style="--d:${i}"><div class="lbl">${m.th}</div><div class="val">${last == null ? '—' : `<span data-count="${last}" data-dec="1">0</span><small>${m.u}</small>`}</div>${pill}${totTxt}</div>`;
+  }).join('');
+  const mt = METRICS.find(m => m.k === S.metric);
+  el.innerHTML = `<div class="mtiles">${tiles}</div>
+    <div class="sec-h reveal" style="--d:5"><h3>กราฟแนวโน้ม</h3></div>
+    <section class="card reveal" style="--d:6"><div class="chips" id="mchips">${METRICS.map(m => `<button class="chip ${m.k === S.metric ? 'on' : ''}" data-metric="${m.k}">${m.th}</button>`).join('')}</div><div class="chart-box"><canvas id="bodyChart"></canvas></div></section>
+    <div class="sec-h reveal" style="--d:7"><h3>ประวัติการวัด</h3><span class="muted" style="font-size:12px">${rows.length} ครั้ง</span></div>
+    <section class="card reveal" style="--d:8;padding:6px 14px">${rows.length ? rows.slice().reverse().map(r => { const dd = parseD(r.date); return `<button class="hrow" data-body="${esc(r.id)}"><div class="hdate"><b>${dd.getDate()}</b><small>${dd.toLocaleDateString('th-TH', { month: 'short', year: '2-digit' })}</small></div><div class="hvals">${METRICS.map(m => `<span>${fmt(num(r[m.k]), 1)}<small>${m.th}</small></span>`).join('')}</div></button>`; }).join('')
+      : `<div class="empty"><div class="eic">${icon('ruler')}</div><p>ยังไม่มีข้อมูลสัดส่วน</p><button class="btn btn-primary" data-add="body">${icon('plus')}บันทึกครั้งแรก</button></div>`}</section>`;
+  animateCounts(el);
+  drawBodyChart(mt);
+}
+function drawBodyChart(mt) {
+  const s = seriesOf(mt.k);
+  makeChart('bodyChart', {
+    type: 'line',
+    data: { labels: s.map(p => thDate(p.date)), datasets: [{ data: s.map(p => p.v), borderColor: '#FF7A1A', borderWidth: 2.5, tension: .4, fill: true, pointRadius: 4, pointHoverRadius: 6, pointBackgroundColor: '#fff', pointBorderColor: '#FF7A1A', pointBorderWidth: 2,
+      backgroundColor: ctx => { const { chart } = ctx, { ctx: c, chartArea: a } = chart; if (!a) return 'transparent'; const g = c.createLinearGradient(0, a.top, 0, a.bottom); g.addColorStop(0, 'rgba(255,122,26,.32)'); g.addColorStop(1, 'rgba(255,122,26,0)'); return g; } }] },
+    options: { maintainAspectRatio: false, animation: { duration: 1200, easing: 'easeOutQuart' }, plugins: { legend: { display: false }, tooltip: { ...tooltipStyle, callbacks: { label: i => fmt(i.raw, 1) + ' ' + mt.u } } },
+      scales: { x: { grid: { display: false }, border: { display: false }, ticks: { maxTicksLimit: 6 } }, y: { grid: { color: '#EEF1F6' }, border: { display: false }, ticks: { maxTicksLimit: 5 } } } }
+  });
+}
+
+/* ---------- Profile ---------- */
+function renderProfile() {
+  const el = $('#page-profile'), p = S.profile, c = calc();
+  const ws = seriesOf('weight'), tw = num(p.targetWeight);
+  let goal = '';
+  if (tw && ws.length) {
+    const start = ws[0].v, cur = ws[ws.length - 1].v, total = start - tw, done = start - cur;
+    const pct = total ? Math.max(0, Math.min(100, done / total * 100)) : 100;
+    goal = `<section class="card reveal" style="--d:1"><div class="sec-h" style="margin:0"><h3>เป้าหมายน้ำหนัก</h3><span style="color:var(--orange);font-weight:500">${fmt(pct)}%</span></div><div class="goal-track"><div class="goal-fill" data-w="${pct}"></div></div><div style="display:flex;justify-content:space-between;font-size:12px" class="muted"><span>เริ่ม ${fmt(start, 1)} กก.</span><span>ตอนนี้ ${fmt(cur, 1)}</span><span>เป้า ${fmt(tw, 1)} กก.</span></div></section>`;
+  }
+  const act = ACTIVITY.find(a => a[0] == num(p.activity));
+  el.innerHTML = `
+    <section class="card reveal" style="--d:0"><div class="prof"><div class="avatar">${esc((p.name || 'U').trim().charAt(0).toUpperCase())}</div><div style="flex:1"><h2>${esc(p.name || 'ยังไม่ได้ตั้งชื่อ')}</h2><p>${p.sex ? (p.sex === 'male' ? 'ชาย' : 'หญิง') : '—'} · ${num(p.age) ? fmt(num(p.age)) + ' ปี' : '—'} · ${num(p.height) ? fmt(num(p.height)) + ' ซม.' : '—'}</p></div>
+      <button class="xbtn" data-edit-profile aria-label="แก้ไข">${icon('edit')}</button></div>
+      <div style="margin-top:12px">
+        <div class="kv"><span>ระดับกิจกรรม</span><span>${act ? act[1] : '—'}</span></div>
+        <div class="kv"><span>เป้าแคลอรี่ / วัน</span><span><b>${fmt(c.target)}</b> kcal ${num(p.targetKcal) ? '' : '<small class="muted">(อัตโนมัติ)</small>'}</span></div>
+        <div class="kv"><span>BMR / TDEE</span><span>${fmt(c.bmr)} / ${fmt(c.tdee)} kcal</span></div>
+      </div></section>
+    ${goal}
+    <div class="sec-h reveal" style="--d:2"><h3>สูตรที่ใช้คำนวณ</h3></div>
+    <section class="card reveal" style="--d:3">
+      <div class="formula"><b>BMI</b> = น้ำหนัก ÷ (ส่วนสูง ม.)² · เกณฑ์เอเชีย: 18.5–22.9 สมส่วน</div>
+      <div class="formula"><b>เอว/สะโพก (WHR)</b> · เสี่ยงเมื่อ ชาย &gt; 0.90 / หญิง &gt; 0.85</div>
+      <div class="formula"><b>เอว/ส่วนสูง (WHtR)</b> · ควรต่ำกว่า 0.5</div>
+      <div class="formula"><b>%ไขมัน (RFM)</b> = 64 (ชาย) หรือ 76 (หญิง) − 20 × (ส่วนสูง ÷ รอบเอว)</div>
+      <div class="formula"><b>BMR</b> Mifflin-St Jeor · <b>TDEE</b> = BMR × ระดับกิจกรรม · ถ้าเป้าน้ำหนักต่ำกว่าปัจจุบันจะตั้งเป้า TDEE − 500</div>
+      <div class="formula"><b>Macro เป้าหมาย</b> โปรตีน 30% · คาร์บ 40% · ไขมัน 30% ของเป้าแคลอรี่</div>
+    </section>
+    <div class="sec-h reveal" style="--d:4"><h3>ระบบ</h3></div>
+    <section class="card reveal" style="--d:5">
+      <div class="kv"><span>แหล่งข้อมูล</span><span>${DEMO ? 'ข้อมูลตัวอย่าง (ยังไม่ได้ใส่ API_URL)' : 'Google Sheet'}</span></div>
+      <div class="kv"><span>สถานะ</span><span>${S.unlocked ? '<b style="color:var(--orange)">แก้ไขได้</b>' : 'ดูอย่างเดียว'}</span></div>
+      <div class="row" style="margin-top:12px"><button class="btn btn-ghost" id="refreshBtn">${icon('refresh')}รีเฟรช</button><button class="btn ${S.unlocked ? 'btn-navy' : 'btn-primary'}" id="lockBtn">${icon(S.unlocked ? 'lock' : 'unlock')}${S.unlocked ? 'ล็อก' : 'ปลดล็อก'}</button></div>
+    </section>`;
+  afterPaint(() => $$('.goal-fill', el).forEach(b => b.style.width = b.dataset.w + '%'));
+}
+
+/* ---------- Navigation ---------- */
+const NAV = { home: ['home', 'หน้าหลัก'], meals: ['meal', 'มื้ออาหาร'], body: ['body', 'สัดส่วน'], profile: ['user', 'โปรไฟล์'] };
+function renderCurrent() { ({ home: renderHome, meals: renderMeals, body: renderBody, profile: renderProfile })[S.page](); }
+function renderAll() { renderHero(); renderCurrent(); }
+function go(page) {
+  if (!NAV[page]) return;
+  S.page = page;
+  $$('.page').forEach(p => p.classList.toggle('active', p.id === 'page-' + page));
+  $$('.nav .tab').forEach(b => b.classList.toggle('active', b.dataset.go === page));
+  window.scrollTo({ top: 0 });
+  renderAll();
+}
+
+/* ---------- Sheet ---------- */
+function openSheet(html, mount) {
+  $('#sheetBody').innerHTML = html; $('#sheetBody').scrollTop = 0;
+  $('#overlay').classList.add('show'); $('#sheet').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  if (mount) mount($('#sheetBody'));
+}
+function closeSheet() { $('#overlay').classList.remove('show'); const s = $('#sheet'); s.classList.remove('open'); s.style.transform = ''; document.body.style.overflow = ''; }
+const sheetHead = t => `<div class="sheet-title"><h2>${t}</h2><button class="xbtn" data-close>${icon('x')}</button></div>`;
+(() => {
+  let y0 = null, dy = 0; const h = $('#sheetHandle'), s = $('#sheet');
+  h.addEventListener('touchstart', e => { y0 = e.touches[0].clientY; s.classList.add('drag'); }, { passive: true });
+  h.addEventListener('touchmove', e => { if (y0 == null) return; dy = Math.max(0, e.touches[0].clientY - y0); s.style.transform = `translateY(${dy}px)`; }, { passive: true });
+  h.addEventListener('touchend', () => { s.classList.remove('drag'); s.style.transform = ''; if (dy > 110) closeSheet(); y0 = null; dy = 0; });
+})();
+
+function requireUnlock(fn) { S.unlocked ? fn() : openPin(fn); }
+function chooseAdd() {
+  openSheet(sheetHead('เพิ่มข้อมูล') + `<div class="choose">
+    <button data-add="meal"><span class="cic">${icon('camera')}</span><span><b>บันทึกมื้ออาหาร</b><small>ถ่ายรูป ใส่แคลอรี่และสารอาหาร</small></span></button>
+    <button data-add="body"><span class="cic">${icon('ruler')}</span><span><b>บันทึกสัดส่วน</b><small>น้ำหนัก รอบเอว สะโพก แขน ต้นขา</small></span></button></div>`);
+}
+
+/* ---------- Meal form ---------- */
+function compressImage(file, max = 1280, q = 0.82) {
+  return new Promise((res, rej) => {
+    const img = new Image(), url = URL.createObjectURL(file);
+    img.onload = () => {
+      const s = Math.min(1, max / Math.max(img.width, img.height)), w = Math.round(img.width * s), h = Math.round(img.height * s);
+      const c = document.createElement('canvas'); c.width = w; c.height = h;
+      const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, w, h); x.drawImage(img, 0, 0, w, h);
+      URL.revokeObjectURL(url); res(c.toDataURL('image/jpeg', q));
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); rej(new Error('เปิดรูปไม่ได้')); };
+    img.src = url;
+  });
+}
+function mealForm(m = {}) {
+  const isEdit = !!m.id, time = m.time || nowTime(), type = m.type || guessType(time);
+  let photoData = null, removePhoto = false;
+  const date = m.date || (S.selDate !== 'all' ? S.selDate : today());
+  openSheet(sheetHead(isEdit ? 'แก้ไขมื้ออาหาร' : 'บันทึกมื้ออาหาร') + `
+    <form id="mealF" autocomplete="off">
+      <input type="file" id="mPhoto" accept="image/*" hidden>
+      <div class="photo-pick ${m.photoUrl ? 'has' : ''}" id="pickBox">
+        <div class="ph-ph">${icon('camera')}แตะเพื่อถ่ายรูป / เลือกรูป</div>
+        ${m.photoUrl ? `<img src="${esc(m.photoUrl)}" referrerpolicy="no-referrer" alt="">` : ''}
+        <div class="photo-actions" ${m.photoUrl ? '' : 'hidden'}><button type="button" id="rmPhoto">ลบรูป</button><button type="button" id="chPhoto">เปลี่ยนรูป</button></div>
+      </div>
+      <div class="field"><label>ประเภทมื้อ</label><div class="typechips">${MEAL_TYPES.map((t, i) => `<input type="radio" name="type" id="ty${i}" value="${t.k}" ${t.k === type ? 'checked' : ''}><label for="ty${i}" style="--tc:${t.c}">${t.k}</label>`).join('')}</div></div>
+      <div class="field"><label>ชื่อเมนู</label><input class="inp" name="name" required maxlength="120" placeholder="เช่น ข้าวกล้องอกไก่ย่าง" value="${esc(m.name || '')}"></div>
+      <div class="grid2"><div class="field"><label>วันที่</label><input class="inp" type="date" name="date" required value="${esc(date)}"></div><div class="field"><label>เวลา</label><input class="inp" type="time" name="time" required value="${esc(time)}"></div></div>
+      <div class="field"><label>พลังงาน</label><div class="unit"><input class="inp" name="kcal" inputmode="decimal" placeholder="0" value="${esc(m.kcal ?? '')}"><em>kcal</em></div></div>
+      <div class="hint"><span id="kcalHint">คำนวณจาก P/C/F: — kcal</span><button type="button" class="link" id="useCalc">ใช้ค่านี้</button></div>
+      <div class="grid3">
+        <div class="field"><label>โปรตีน</label><div class="unit"><input class="inp" name="protein" inputmode="decimal" placeholder="0" value="${esc(m.protein ?? '')}"><em>ก.</em></div></div>
+        <div class="field"><label>คาร์บ</label><div class="unit"><input class="inp" name="carb" inputmode="decimal" placeholder="0" value="${esc(m.carb ?? '')}"><em>ก.</em></div></div>
+        <div class="field"><label>ไขมัน</label><div class="unit"><input class="inp" name="fat" inputmode="decimal" placeholder="0" value="${esc(m.fat ?? '')}"><em>ก.</em></div></div>
+      </div>
+      <div class="field"><label>หมายเหตุ</label><textarea class="inp" name="note" maxlength="400" placeholder="ความรู้สึก ปริมาณ ร้าน ฯลฯ">${esc(m.note || '')}</textarea></div>
+      <button class="btn btn-primary btn-block" type="submit" id="mSave">${icon('check')}${isEdit ? 'บันทึกการแก้ไข' : 'บันทึกมื้ออาหาร'}</button>
+    </form>`, root => {
+    const f = $('#mealF', root), fi = $('#mPhoto', root), box = $('#pickBox', root), acts = $('.photo-actions', root);
+    const pick = () => fi.click();
+    box.addEventListener('click', e => { if (!e.target.closest('.photo-actions')) pick(); });
+    $('#chPhoto', root).addEventListener('click', pick);
+    $('#rmPhoto', root).addEventListener('click', () => { photoData = null; removePhoto = !!m.photoUrl; const im = $('img', box); if (im) im.remove(); box.classList.remove('has'); acts.hidden = true; fi.value = ''; });
+    fi.addEventListener('change', async () => {
+      const file = fi.files[0]; if (!file) return;
+      try {
+        photoData = await compressImage(file); removePhoto = false;
+        let im = $('img', box); if (!im) { im = document.createElement('img'); box.insertBefore(im, acts); }
+        im.src = photoData; box.classList.add('has'); acts.hidden = false;
+      } catch (err) { toast(err.message, 'err'); }
+    });
+    const calcK = () => { const p = num(f.protein.value) || 0, c = num(f.carb.value) || 0, fa = num(f.fat.value) || 0; return Math.round(p * 4 + c * 4 + fa * 9); };
+    const upd = () => { const k = calcK(); $('#kcalHint', root).textContent = 'คำนวณจาก P/C/F: ' + (k ? fmt(k) : '—') + ' kcal'; };
+    ['protein', 'carb', 'fat'].forEach(n => f[n].addEventListener('input', upd)); upd();
+    $('#useCalc', root).addEventListener('click', () => { const k = calcK(); if (k) f.kcal.value = k; });
+    f.time.addEventListener('change', () => { if (!isEdit) { const g = guessType(f.time.value); const r = $$('input[name=type]', f).find(x => x.value === g); if (r && !$$('input[name=type]', f).some(x => x.checked && x.value === 'Meal Replacement')) r.checked = true; } });
+    f.addEventListener('submit', async e => {
+      e.preventDefault();
+      const fd = Object.fromEntries(new FormData(f));
+      if (fd.kcal === '' && calcK()) fd.kcal = calcK();
+      const data = { id: m.id, date: fd.date, time: fd.time, type: fd.type, name: fd.name.trim(), kcal: fd.kcal, protein: fd.protein, carb: fd.carb, fat: fd.fat, note: fd.note };
+      const btn = $('#mSave', root); setBtnLoading(btn, true, photoData ? 'กำลังอัปโหลดรูป…' : 'กำลังบันทึก…');
+      try {
+        const res = await apiPost({ action: 'saveMeal', pin: S.pin, data, photoData, removePhoto });
+        if (!res.ok) throw res;
+        upsertLocal(S.meals, res.item); cacheNow();
+        closeSheet(); S.selDate = data.date; renderAll(); toast(isEdit ? 'แก้ไขเรียบร้อย' : 'บันทึกมื้ออาหารแล้ว');
+      } catch (err) { handleErr(err); setBtnLoading(btn, false); }
+    });
+  });
+}
+function handleErr(err) {
+  if (err && err.code === 'BAD_PIN') { lockNow(); toast('PIN หมดอายุหรือไม่ถูกต้อง กรุณาปลดล็อกใหม่', 'err'); return; }
+  toast((err && (err.error || err.message)) || 'เกิดข้อผิดพลาด', 'err');
+}
+
+function mealDetail(id) {
+  const m = S.meals.find(x => x.id === id); if (!m) return;
+  const t = typeOf(m.type);
+  openSheet(`<div class="sheet-title"><div><span class="tag" style="--tc:${t.c}">${esc(m.type)}</span><div class="muted" style="font-size:12.5px;margin-top:2px">${thDate(m.date, { weekday: 'long', day: 'numeric', month: 'long' })} · ${esc(m.time)}</div></div><button class="xbtn" data-close>${icon('x')}</button></div>
+    ${photoBox(m, 'detail-photo')}
+    <h2 style="margin:0;font-size:21px;font-weight:500;line-height:1.3">${esc(m.name)}</h2>
+    <div class="dmacro"><div><b>${fmt(num(m.kcal))}</b><small>kcal</small></div><div><b>${fmt(num(m.protein))}</b><small>โปรตีน ก.</small></div><div><b>${fmt(num(m.carb))}</b><small>คาร์บ ก.</small></div><div><b>${fmt(num(m.fat))}</b><small>ไขมัน ก.</small></div></div>
+    ${m.note ? `<div class="note">${esc(m.note)}</div>` : ''}
+    <div class="row"><button class="btn btn-danger" id="delB">${icon('trash')}ลบ</button><button class="btn btn-navy" id="edB">${icon('edit')}แก้ไข</button></div>
+    ${S.unlocked ? '' : '<p class="muted" style="font-size:12px;text-align:center;margin:12px 0 0">ต้องใส่ PIN ก่อนแก้ไขหรือลบ</p>'}`, root => {
+    $('#edB', root).addEventListener('click', () => requireUnlock(() => mealForm(m)));
+    confirmDelete($('#delB', root), async () => {
+      const res = await apiPost({ action: 'deleteMeal', pin: S.pin, id: m.id }); if (!res.ok) throw res;
+      S.meals = S.meals.filter(x => x.id !== m.id); cacheNow(); closeSheet(); renderAll(); toast('ลบรายการแล้ว');
+    });
+  });
+}
+function confirmDelete(btn, action) {
+  let armed = false, tm;
+  btn.addEventListener('click', () => requireUnlock(async () => {
+    if (!armed) { armed = true; btn.innerHTML = icon('trash') + 'แตะอีกครั้งเพื่อยืนยัน'; clearTimeout(tm); tm = setTimeout(() => { armed = false; btn.innerHTML = icon('trash') + 'ลบ'; }, 3000); return; }
+    setBtnLoading(btn, true, 'กำลังลบ…');
+    try { await action(); } catch (err) { handleErr(err); setBtnLoading(btn, false); armed = false; btn.innerHTML = icon('trash') + 'ลบ'; }
+  }));
+}
+
+/* ---------- Body form ---------- */
+function bodyForm(r = {}) {
+  const isEdit = !!r.id, rows = sortedBody(), last = rows[rows.length - 1] || {};
+  openSheet(sheetHead(isEdit ? 'แก้ไขสัดส่วน' : 'บันทึกสัดส่วน') + `
+    <form id="bodyF" autocomplete="off">
+      <div class="field"><label>วันที่วัด</label><input class="inp" type="date" name="date" required value="${esc(r.date || today())}"></div>
+      <div class="field"><label>น้ำหนัก</label><div class="unit"><input class="inp" name="weight" inputmode="decimal" placeholder="${last.weight ? 'ครั้งก่อน ' + last.weight : '0.0'}" value="${esc(r.weight ?? '')}"><em>กก.</em></div></div>
+      <div class="grid2">${METRICS.slice(1).map(m => `<div class="field"><label>${m.th}</label><div class="unit"><input class="inp" name="${m.k}" inputmode="decimal" placeholder="${last[m.k] ? 'ก่อน ' + last[m.k] : '0.0'}" value="${esc(r[m.k] ?? '')}"><em>ซม.</em></div></div>`).join('')}</div>
+      <div class="field"><label>หมายเหตุ</label><textarea class="inp" name="note" maxlength="300" placeholder="เช่น วัดตอนเช้าก่อนอาหาร">${esc(r.note || '')}</textarea></div>
+      <button class="btn btn-primary btn-block" type="submit" id="bSave">${icon('check')}${isEdit ? 'บันทึกการแก้ไข' : 'บันทึกสัดส่วน'}</button>
+      ${isEdit ? `<button class="btn btn-danger btn-block" type="button" id="bDel" style="margin-top:10px">${icon('trash')}ลบ</button>` : ''}
+    </form>`, root => {
+    const f = $('#bodyF', root);
+    f.addEventListener('submit', async e => {
+      e.preventDefault();
+      const fd = Object.fromEntries(new FormData(f));
+      if (!METRICS.some(m => num(fd[m.k]) !== null)) { toast('กรอกอย่างน้อย 1 ค่า', 'err'); return; }
+      const data = { id: r.id, ...fd };
+      const btn = $('#bSave', root); setBtnLoading(btn, true);
+      try {
+        const res = await apiPost({ action: 'saveBody', pin: S.pin, data }); if (!res.ok) throw res;
+        upsertLocal(S.body, res.item); cacheNow(); closeSheet(); renderAll(); toast('บันทึกสัดส่วนแล้ว');
+      } catch (err) { handleErr(err); setBtnLoading(btn, false); }
+    });
+    if (isEdit) confirmDelete($('#bDel', root), async () => {
+      const res = await apiPost({ action: 'deleteBody', pin: S.pin, id: r.id }); if (!res.ok) throw res;
+      S.body = S.body.filter(x => x.id !== r.id); cacheNow(); closeSheet(); renderAll(); toast('ลบรายการแล้ว');
+    });
+  });
+}
+
+/* ---------- Profile form ---------- */
+function profileForm() {
+  const p = S.profile, c = calc();
+  openSheet(sheetHead('แก้ไขโปรไฟล์') + `
+    <form id="profF" autocomplete="off">
+      <div class="field"><label>ชื่อเล่น</label><input class="inp" name="name" maxlength="40" value="${esc(p.name || '')}" placeholder="ชื่อที่ให้แสดง"></div>
+      <div class="field"><label>เพศ (ใช้คำนวณ BMR และ %ไขมัน)</label><div class="seg"><input type="radio" name="sex" id="sxf" value="female" ${p.sex !== 'male' ? 'checked' : ''}><label for="sxf">หญิง</label><input type="radio" name="sex" id="sxm" value="male" ${p.sex === 'male' ? 'checked' : ''}><label for="sxm">ชาย</label></div></div>
+      <div class="grid2"><div class="field"><label>อายุ</label><div class="unit"><input class="inp" name="age" inputmode="numeric" value="${esc(p.age ?? '')}" placeholder="0"><em>ปี</em></div></div><div class="field"><label>ส่วนสูง</label><div class="unit"><input class="inp" name="height" inputmode="decimal" value="${esc(p.height ?? '')}" placeholder="0"><em>ซม.</em></div></div></div>
+      <div class="field"><label>ระดับกิจกรรม</label><select class="inp" name="activity">${ACTIVITY.map(a => `<option value="${a[0]}" ${a[0] == num(p.activity) ? 'selected' : ''}>${a[1]}</option>`).join('')}</select></div>
+      <div class="grid2"><div class="field"><label>น้ำหนักเป้าหมาย</label><div class="unit"><input class="inp" name="targetWeight" inputmode="decimal" value="${esc(p.targetWeight ?? '')}" placeholder="—"><em>กก.</em></div></div><div class="field"><label>เป้าแคลอรี่</label><div class="unit"><input class="inp" name="targetKcal" inputmode="numeric" value="${esc(p.targetKcal ?? '')}" placeholder="${c.auto ? 'อัตโนมัติ ' + c.auto : 'อัตโนมัติ'}"><em>kcal</em></div></div></div>
+      <p class="muted" style="font-size:12px;margin:-4px 2px 16px">เว้นเป้าแคลอรี่ว่างไว้ ระบบจะคำนวณจาก TDEE และน้ำหนักเป้าหมายให้</p>
+      <button class="btn btn-primary btn-block" type="submit" id="pSave">${icon('check')}บันทึกโปรไฟล์</button>
+    </form>`, root => {
+    const f = $('#profF', root);
+    f.addEventListener('submit', async e => {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(f));
+      const btn = $('#pSave', root); setBtnLoading(btn, true);
+      try {
+        const res = await apiPost({ action: 'saveProfile', pin: S.pin, data }); if (!res.ok) throw res;
+        S.profile = res.item; cacheNow(); closeSheet(); renderAll(); toast('บันทึกโปรไฟล์แล้ว');
+      } catch (err) { handleErr(err); setBtnLoading(btn, false); }
+    });
+  });
+}
+
+/* ---------- PIN ---------- */
+let pinBuf = '', pinCb = null, pinBusy = false;
+function drawDots() { $$('#dots i').forEach((d, i) => d.classList.toggle('f', i < pinBuf.length)); }
+function openPin(cb) {
+  pinCb = cb || null; pinBuf = ''; drawDots();
+  $('#dots').className = 'dots'; const m = $('#pinMsg'); m.className = '';
+  m.textContent = DEMO ? 'โหมดตัวอย่าง: ใส่ตัวเลข 6 หลักใดก็ได้' : 'ไม่ใส่ PIN จะดูข้อมูลได้อย่างเดียว';
+  $('#pin').classList.add('show');
+}
+function closePin() { $('#pin').classList.remove('show'); pinCb = null; }
+async function pinPress(k) {
+  if (pinBusy) return;
+  if (k === 'del') pinBuf = pinBuf.slice(0, -1); else if (pinBuf.length < 6) pinBuf += k;
+  drawDots(); if (navigator.vibrate) navigator.vibrate(8);
+  if (pinBuf.length < 6) return;
+  pinBusy = true; const dots = $('#dots'), msg = $('#pinMsg');
+  dots.className = 'dots wait'; msg.className = ''; msg.textContent = 'กำลังตรวจสอบ…';
+  let res; try { res = await apiPost({ action: 'verify', pin: pinBuf }); } catch (e) { res = { ok: false, error: 'เชื่อมต่อไม่ได้' }; }
+  if (res.ok) {
+    S.unlocked = true; S.pin = pinBuf; sess.set('mj.pin', pinBuf);
+    dots.className = 'dots okk'; msg.textContent = 'ปลดล็อกแล้ว';
+    const cb = pinCb;
+    setTimeout(() => { closePin(); renderAll(); toast('โหมดแก้ไขเปิดแล้ว'); if (cb) cb(); }, 450);
+  } else {
+    dots.className = 'dots'; void dots.offsetWidth; dots.classList.add('shake');
+    msg.className = 'err'; msg.textContent = res.error || 'PIN ไม่ถูกต้อง';
+    if (navigator.vibrate) navigator.vibrate([40, 60, 40]);
+    pinBuf = ''; setTimeout(drawDots, 300);
+  }
+  pinBusy = false;
+}
+function lockNow() { S.unlocked = false; S.pin = null; sess.set('mj.pin', null); renderAll(); }
+
+/* ---------- Events ---------- */
+document.addEventListener('click', e => {
+  const t = e.target;
+  const g = t.closest('[data-go]'); if (g) { go(g.dataset.go); return; }
+  if (t.closest('[data-close]')) { closeSheet(); return; }
+  const a = t.closest('[data-add]'); if (a) { const k = a.dataset.add; requireUnlock(() => k === 'meal' ? mealForm() : bodyForm()); return; }
+  const m = t.closest('[data-meal]'); if (m) { mealDetail(m.dataset.meal); return; }
+  const b = t.closest('[data-body]'); if (b) { const r = S.body.find(x => x.id === b.dataset.body); if (r) requireUnlock(() => bodyForm(r)); return; }
+  const d = t.closest('[data-date]'); if (d) { S.selDate = d.dataset.date; renderMeals(); return; }
+  const mt = t.closest('[data-metric]'); if (mt) { S.metric = mt.dataset.metric; $$('#mchips .chip').forEach(c => c.classList.toggle('on', c === mt)); drawBodyChart(METRICS.find(x => x.k === S.metric)); return; }
+  if (t.closest('[data-edit-profile]')) { requireUnlock(profileForm); return; }
+  if (t.closest('#refreshBtn')) { load().then(() => toast('อัปเดตข้อมูลล่าสุดแล้ว')); return; }
+  if (t.closest('#lockBtn')) { S.unlocked ? (lockNow(), toast('ล็อกแล้ว — ดูได้อย่างเดียว')) : openPin(); return; }
+});
+$('#overlay').addEventListener('click', closeSheet);
+$('#fab').addEventListener('click', () => requireUnlock(chooseAdd));
+$('#modeBtn').addEventListener('click', () => S.unlocked ? (lockNow(), toast('ล็อกแล้ว — ดูได้อย่างเดียว')) : openPin());
+$('#pinClose').addEventListener('click', closePin);
+document.addEventListener('keydown', e => {
+  if (!$('#pin').classList.contains('show')) { if (e.key === 'Escape') closeSheet(); return; }
+  if (/^\d$/.test(e.key)) pinPress(e.key); else if (e.key === 'Backspace') pinPress('del'); else if (e.key === 'Escape') closePin();
+});
+
+/* ---------- Static UI ---------- */
+function buildStatic() {
+  $('#brandMark').innerHTML = icon('meal');
+  $$('.nav .tab').forEach(b => { const [ic, lb] = NAV[b.dataset.go]; b.innerHTML = icon(ic) + '<span>' + lb + '</span>'; });
+  $('#fab').innerHTML = icon('plus');
+  $('#pinClose').innerHTML = icon('x');
+  $('#pinLock').innerHTML = icon('lock');
+  $('#keys').innerHTML = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', 'del'].map(k => k === '' ? '<button class="blank" tabindex="-1"></button>' : k === 'del' ? `<button class="del" data-k="del" aria-label="ลบ">${icon('back')}</button>` : `<button data-k="${k}">${k}</button>`).join('');
+  $('#keys').addEventListener('click', e => { const b = e.target.closest('[data-k]'); if (b) pinPress(b.dataset.k); });
+}
+function skeleton() {
+  $('#page-home').innerHTML = `<div class="skel" style="height:178px;margin-bottom:14px"></div><div class="stats">${'<div class="skel" style="height:104px"></div>'.repeat(4)}</div>`;
+}
+
+/* ---------- Load ---------- */
+function hideSplash() { $('#splash').classList.add('hide'); }
+async function load() {
+  const cached = !DEMO && !S.loaded ? store.get(CONFIG.CACHE_KEY) : null;
+  if (cached) { applyData(cached); renderAll(); hideSplash(); }
+  try {
+    const res = await apiGet();
+    if (!res || !res.ok) throw new Error((res && res.error) || 'โหลดข้อมูลไม่สำเร็จ');
+    applyData(res.data); S.loaded = true; cacheNow(); renderAll();
+  } catch (err) {
+    toast('เชื่อมต่อ Google Sheet ไม่ได้: ' + err.message, 'err');
+    if (!cached) renderAll();
+  }
+  hideSplash();
+}
+
+buildStatic();
+const savedPin = sess.get('mj.pin'); if (savedPin) { S.pin = savedPin; S.unlocked = true; }
+renderHero(); skeleton();
+setTimeout(load, DEMO ? 650 : 0);
+</script>
+</body>
+</html>
