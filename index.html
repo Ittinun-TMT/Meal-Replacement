@@ -481,13 +481,11 @@ const icon = (n, cls = '') => `<svg class="ic ${cls}" viewBox="0 0 24 24" aria-h
 const MEAL_TYPES = [
   { k: 'มื้อเช้า', s: 'เช้า', c: '#E8664F', g: ['#F7B7A9', '#E8664F'] },
   { k: 'มื้อกลางวัน', s: 'กลางวัน', c: '#D14029', g: ['#EE8A76', '#B5321E'] },
-  { k: 'มื้อเย็น', s: 'เย็น', c: '#00408F', g: ['#4F82C6', '#002C66'] },
-  { k: 'มื้อว่าง', s: 'ว่าง', c: '#8FA7C9', g: ['#D5E0EF', '#8FA7C9'] },
-  { k: 'Meal Replacement', s: 'Meal Replacement', c: '#2B7BD8', g: ['#8DBBF0', '#0A54B0'] }
+  { k: 'มื้อเย็น', s: 'เย็น', c: '#00408F', g: ['#4F82C6', '#002C66'] }
 ];
 const MAIN = ['มื้อเช้า', 'มื้อกลางวัน', 'มื้อเย็น'];
-const typeOf = k => MEAL_TYPES.find(t => t.k === k) || MEAL_TYPES[1];
-const guessType = t => { const h = +String(t || nowTime()).split(':')[0]; return h < 11 ? 'มื้อเช้า' : h < 15 ? 'มื้อกลางวัน' : h < 17 ? 'มื้อว่าง' : 'มื้อเย็น'; };
+const typeOf = k => MEAL_TYPES.find(t => t.k === k) || { k, s: k || 'อื่น ๆ', c: '#8FA7C9', g: ['#D5E0EF', '#8FA7C9'] };
+const guessType = t => { const h = +String(t || nowTime()).split(':')[0]; return h < 11 ? 'มื้อเช้า' : h < 16 ? 'มื้อกลางวัน' : 'มื้อเย็น'; };
 const METRICS = [
   { k: 'weight', th: 'น้ำหนัก', u: 'กก.' },
   { k: 'waist', th: 'รอบเอว', u: 'ซม.' },
@@ -523,16 +521,16 @@ function demoStore() {
   }
   const pool = [
     ['มื้อเช้า', '07:50', 'กรีกโยเกิร์ต กราโนล่า เบอร์รี่'],
-    ['Meal Replacement', '08:30', 'เชคโปรตีนวานิลลา'],
+    ['มื้อเช้า', '08:30', 'ข้าวต้มปลา'],
     ['มื้อกลางวัน', '12:20', 'ข้าวกล้องอกไก่ย่าง สลัดผัก'],
-    ['มื้อว่าง', '15:30', 'อัลมอนด์อบ 1 กำมือ'],
+    ['มื้อเย็น', '18:30', 'ผัดผักรวม ไข่ต้ม'],
     ['มื้อเย็น', '18:45', 'แซลมอนย่าง ผักโขม มันหวาน'],
     ['มื้อกลางวัน', '12:10', 'ส้มตำไทย ไก่ย่าง'],
     ['มื้อเย็น', '19:00', 'ต้มยำกุ้งน้ำใส']
   ];
   for (let i = 6; i >= 0; i--) {
     const d = addDays(t, -i);
-    const pick = i === 0 ? [1, 2, 3] : [i % 2 ? 0 : 1, i % 3 ? 2 : 5, 3, i % 2 ? 4 : 6];
+    const pick = i === 0 ? [1, 2] : [i % 2 ? 0 : 1, i % 3 ? 2 : 5, i % 2 ? 4 : (i % 3 ? 6 : 3)];
     pick.forEach((p, j) => { const m = pool[p]; meals.push({ id: 'm' + i + j, date: d, time: m[1], type: m[0], name: m[2], photoUrl: '', note: j === 1 ? 'ทานผักเพิ่ม' : '' }); });
   }
   _demo = { body, meals, profile: { name: 'ผู้ใช้ทดลอง', sex: 'female', height: 162, targetWeight: 60 } };
@@ -659,7 +657,7 @@ function statTile(lbl, v, dec, unit, label, cls = '', d = 0, signedVal = false) 
 function renderHome() {
   const el = $('#page-home'), c = calc(), t = today(), tm = mealsOn(t);
   const done = new Set(tm.map(m => m.type));
-  const slots = Math.min(3, MAIN.filter(k => done.has(k)).length + tm.filter(m => m.type === 'Meal Replacement').length);
+  const slots = MAIN.filter(k => done.has(k)).length;
   const st = streak(), ws = seriesOf('weight');
   const wd = ws.length > 1 ? ws[ws.length - 1].v - ws[ws.length - 2].v : null;
   const wLabel = wd == null ? null : [(wd <= 0 ? '▼ ' : '▲ ') + fmt(Math.abs(wd), 1) + ' กก. จากครั้งก่อน', wd <= 0 ? 'good' : 'warn'];
@@ -724,7 +722,7 @@ function renderMeals() {
     }).join('') : emptyMeals();
   } else {
     const ms = mealsOn(sel);
-    listHTML = `<section class="card daysum reveal" style="--d:1"><div><b class="o" data-count="${ms.length}">0</b><small>มื้อทั้งหมด</small></div><div><b data-count="${ms.filter(m => m.photoUrl).length}">0</b><small>มีรูป</small></div><div><b data-count="${ms.filter(m => m.type === 'Meal Replacement').length}">0</b><small>Meal Replacement</small></div></section>
+    listHTML = `<section class="card daysum reveal" style="--d:1"><div><b class="o" data-count="${ms.length}">0</b><small>มื้อทั้งหมด</small></div><div><b data-count="${ms.filter(m => m.photoUrl).length}">0</b><small>มีรูป</small></div><div><b>${MAIN.filter(k => ms.some(m => m.type === k)).length}<span class="muted" style="font-size:13px;font-weight:400">/3</span></b><small>มื้อหลัก</small></div></section>
       <div class="dgroup-h reveal" style="--d:2"><span>${thDate(sel, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</span></div>
       ${ms.length ? `<div class="timeline">${ms.map((m, i) => mealCard(m, i + 3)).join('')}</div>` : emptyMeals()}`;
   }
