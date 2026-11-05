@@ -666,10 +666,11 @@ async function demoPost(p) {
 }
 
 /* ---------- data ---------- */
+const normTime = t => { const m = String(t || '').match(/(\d{1,2}):(\d{2})/); return m ? pad(+m[1]) + ':' + m[2] : ''; };
 function applyData(d) {
   S.profile = d.profile || {};
   S.body = (d.body || []).map(r => ({ ...r, date: String(r.date || '').slice(0, 10) }));
-  S.meals = (d.meals || []).map(m => ({ ...m, date: String(m.date || '').slice(0, 10), time: String(m.time || '').slice(0, 5) }));
+  S.meals = (d.meals || []).map(m => ({ ...m, date: String(m.date || '').slice(0, 10), time: normTime(m.time) }));
 }
 function upsertLocal(arr, item) { const i = arr.findIndex(x => x.id === item.id); i > -1 ? arr.splice(i, 1, item) : arr.push(item); }
 function cacheNow() { if (!DEMO) store.set(CONFIG.CACHE_KEY, { profile: S.profile, body: S.body, meals: S.meals }); }
@@ -716,7 +717,7 @@ const afterPaint = fn => requestAnimationFrame(() => requestAnimationFrame(fn));
 let toastT;
 function toast(msg, type = '') {
   const t = $('#toast'); t.className = type; t.innerHTML = icon(type === 'err' ? 'info' : 'check') + '<span>' + esc(msg) + '</span>';
-  afterPaint(() => t.classList.add('show')); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2800);
+  afterPaint(() => t.classList.add('show')); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), type === 'err' ? 5000 : 2800);
 }
 function photoBox(m, cls = '', zoom = false) {
   const t = typeOf(m.type);
@@ -1474,7 +1475,9 @@ function profileForm() {
       const btn = $('#pSave', root); setBtnLoading(btn, true, photoData ? 'กำลังอัปโหลดรูป…' : 'กำลังบันทึก…');
       try {
         const res = await apiPost({ action: 'saveProfile', pin: S.pin, data, photoData, removePhoto }); if (!res.ok) throw res;
-        S.profile = res.item; cacheNow(); closeSheet(); renderAll(); toast('บันทึกโปรไฟล์แล้ว');
+        S.profile = res.item; cacheNow(); closeSheet(); renderAll();
+        if (photoData && !res.item.photoUrl) toast('บันทึกข้อมูลแล้ว แต่รูปไม่ถูกบันทึก — ต้อง Deploy Apps Script เวอร์ชันใหม่', 'err');
+        else toast('บันทึกโปรไฟล์แล้ว');
       } catch (err) { setBtnLoading(btn, false); handleErr(err); }
     });
   });
